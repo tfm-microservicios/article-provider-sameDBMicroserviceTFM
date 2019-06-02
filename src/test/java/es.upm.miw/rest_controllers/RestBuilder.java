@@ -52,6 +52,8 @@ public class RestBuilder<T> {
 
     private boolean log;
 
+    private boolean isHeroku = false;
+
     public RestBuilder(String serverUri, int port) {
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // org.apache.httpcomponents.httpclient
         this.serverUri = serverUri;
@@ -170,12 +172,25 @@ public class RestBuilder<T> {
         return headers;
     }
 
+    public RestBuilder<T> heroku (){
+        this.isHeroku = true;
+        return this;
+    }
+
     private URI uri() {
         UriComponents uriComponents;
         if (params.isEmpty()) {
-            uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).build();
+            if (isHeroku){
+                uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + path).build();
+            }else {
+                uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).build();
+            }
         } else {
-            uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).queryParams(params).build();
+            if (isHeroku){
+                uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + path).queryParams(params).build();
+            }else {
+                uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).queryParams(params).build();
+            }
         }
         if (!expandList.isEmpty()) {
             uriComponents = uriComponents.expand(expandList.toArray());

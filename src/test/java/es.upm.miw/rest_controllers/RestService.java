@@ -27,6 +27,9 @@ public class RestService {
     @Value("${miw.admin.password}")
     private String adminPassword;
 
+    @Value("${user.microservice}")
+    private String userMicroservice;
+
     private int port = 0;
 
     private TokenOutputDto tokenDto;
@@ -66,35 +69,14 @@ public class RestService {
         return restBuilder;
     }
 
-//    public RestService loginAdmin() {
-//        if (!this.isRole(Role.ADMIN)) {
-//            this.tokenDto = new RestBuilder<TokenOutputDto>(this.getPort()).clazz(TokenOutputDto.class)
-//                    .basicAuth(this.adminMobile, this.adminPassword)
-//                    .path(contextPath).path(UserResource.USERS).path(UserResource.TOKEN)
-//                    .post().log().build();
-//        }
-//        return this;
-//    }
-//
-//    public RestService loginManager() {
-//        if (!this.isRole(Role.MANAGER)) {
-//            this.tokenDto = new RestBuilder<TokenOutputDto>(this.getPort()).clazz(TokenOutputDto.class)
-//                    .basicAuth("666666001", "p001")
-//                    .path(contextPath).path(UserResource.USERS).path(UserResource.TOKEN)
-//                    .post().log().build();
-//        }
-//        return this;
-//    }
-//
-//    public RestService loginOperator() {
-//        if (!this.isRole(Role.OPERATOR)) {
-//            this.tokenDto = new RestBuilder<TokenOutputDto>(this.getPort()).clazz(TokenOutputDto.class)
-//                    .basicAuth("666666002", "p002")
-//                    .path(contextPath).path(UserResource.USERS).path(UserResource.TOKEN)
-//                    .post().log().build();
-//        }
-//        return this;
-//    }
+    public RestService loginAdmin() {
+        if (!this.isRole(Role.ADMIN)) {
+            this.tokenDto = new RestBuilder<TokenOutputDto>(userMicroservice).clazz(TokenOutputDto.class)
+                    .basicAuth(this.adminMobile, this.adminPassword).heroku()
+                    .path(contextPath).path("/users/token").post().log().build();
+        }
+        return this;
+    }
 
     public RestService logout() {
         this.tokenDto = null;
