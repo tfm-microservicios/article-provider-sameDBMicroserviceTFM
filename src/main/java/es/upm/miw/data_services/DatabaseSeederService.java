@@ -1,7 +1,6 @@
 package es.upm.miw.data_services;
 
 import es.upm.miw.documents.*;
-import es.upm.miw.repositories.*;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +35,6 @@ public class DatabaseSeederService {
     @Value("${miw.databaseSeeder.ymlFileName:#{null}}")
     private String ymlFileName;
 
-    @Autowired
-    private UserRepository userRepository;
-
     @PostConstruct
     public void constructor() {
         String[] profiles = this.environment.getActiveProfiles();
@@ -50,19 +46,11 @@ public class DatabaseSeederService {
     }
 
     private void initialize() {
-        if (!this.userRepository.findByMobile(this.mobile).isPresent()) {
-            LogManager.getLogger(this.getClass()).warn("------- Create Admin -----------");
-            User user = new User(this.mobile, this.username, this.password);
-            user.setRoles(new Role[]{Role.ADMIN});
-            this.userRepository.save(user);
-        }
     }
 
     public void deleteAllAndInitialize() {
         LogManager.getLogger(this.getClass()).warn("------- Delete All -----------");
         // Delete Repositories -----------------------------------------------------
-
-        this.userRepository.deleteAll();
 
         // -------------------------------------------------------------------------
         this.initialize();
@@ -92,7 +80,6 @@ public class DatabaseSeederService {
         DatabaseGraph tpvGraph = yamlParser.load(input);
 
         // Save Repositories -----------------------------------------------------
-        this.userRepository.saveAll(tpvGraph.getUserList());
 
         // -----------------------------------------------------------------------
 
