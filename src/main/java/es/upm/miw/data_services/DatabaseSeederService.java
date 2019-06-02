@@ -1,7 +1,8 @@
 package es.upm.miw.data_services;
 
 import es.upm.miw.documents.*;
-import es.upm.miw.repositories.*;
+import es.upm.miw.repositories.ArticleRepository;
+import es.upm.miw.repositories.ProviderRepository;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +38,9 @@ public class DatabaseSeederService {
     private String ymlFileName;
 
     @Autowired
-    private UserRepository userRepository;
+    private ProviderRepository providerRepository;
+    @Autowired
+    private ArticleRepository articleRepository;
 
     @PostConstruct
     public void constructor() {
@@ -50,20 +53,20 @@ public class DatabaseSeederService {
     }
 
     private void initialize() {
-        if (!this.userRepository.findByMobile(this.mobile).isPresent()) {
-            LogManager.getLogger(this.getClass()).warn("------- Create Admin -----------");
-            User user = new User(this.mobile, this.username, this.password);
-            user.setRoles(new Role[]{Role.ADMIN});
-            this.userRepository.save(user);
+        if (!this.articleRepository.existsById(VARIOUS_CODE)) {
+            LogManager.getLogger(this.getClass()).warn("------- Create Article Various -----------");
+            Provider provider = new Provider(VARIOUS_NAME);
+            this.providerRepository.save(provider);
+            this.articleRepository.save(Article.builder(VARIOUS_CODE).reference(VARIOUS_NAME).description(VARIOUS_NAME)
+                    .retailPrice("100.00").stock(1000).provider(provider).build());
         }
     }
 
     public void deleteAllAndInitialize() {
         LogManager.getLogger(this.getClass()).warn("------- Delete All -----------");
         // Delete Repositories -----------------------------------------------------
-
-        this.userRepository.deleteAll();
-
+        this.articleRepository.deleteAll();
+        this.providerRepository.deleteAll();
         // -------------------------------------------------------------------------
         this.initialize();
     }
@@ -92,8 +95,8 @@ public class DatabaseSeederService {
         DatabaseGraph tpvGraph = yamlParser.load(input);
 
         // Save Repositories -----------------------------------------------------
-        this.userRepository.saveAll(tpvGraph.getUserList());
-
+        this.providerRepository.saveAll(tpvGraph.getProviderList());
+        this.articleRepository.saveAll(tpvGraph.getArticleList());
         // -----------------------------------------------------------------------
 
         LogManager.getLogger(this.getClass()).warn("------- Seed...   " + "-----------");

@@ -7,18 +7,27 @@ import java.util.List;
 
 public class DatabaseGraph {
 
-    private List<User> userList;
+    private List<Article> articleList;
+    private List<Provider> providerList;
 
     public DatabaseGraph() {
-        this.userList = new ArrayList<>();
+        this.articleList = new ArrayList<>();
+        this.providerList = new ArrayList<>();
     }
 
-    public List<User> getUserList() {
-        return userList;
+    public List<Article> getArticleList() {
+        return articleList;
     }
 
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
+    public void setArticleList(List<Article> articleList) {
+        this.articleList = articleList;
     }
 
+    public List<Provider> getProviderList() {
+        return providerList;
+    }
+
+    public void setProviderList(List<Provider> providerList) {
+        this.providerList = providerList;
+    }
 }
