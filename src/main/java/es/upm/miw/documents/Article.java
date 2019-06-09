@@ -172,6 +172,11 @@ public class Article {
             return this;
         }
 
+        public Builder discontinued(Boolean discontinued) {
+            this.article.discontinued = discontinued;
+            return this;
+        }
+
         public Article build() {
             return this.article;
         }
