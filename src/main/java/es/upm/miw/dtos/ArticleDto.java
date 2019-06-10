@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import es.upm.miw.documents.Article;
 import es.upm.miw.documents.Provider;
+import es.upm.miw.documents.Tax;
 import es.upm.miw.dtos.validations.BigDecimalPositive;
 
 import java.math.BigDecimal;
@@ -20,6 +21,8 @@ public class ArticleDto extends ArticleMinimumDto {
 
     private Integer stock;
 
+    private Tax tax;
+
     @JsonInclude(Include.NON_NULL)
     private String provider;
 
@@ -33,15 +36,16 @@ public class ArticleDto extends ArticleMinimumDto {
         // Empty for framework
     }
 
-    public ArticleDto(String code, String description, String reference, BigDecimal retailPrice, Integer stock) {
+    public ArticleDto(String code, String description, String reference, BigDecimal retailPrice, Integer stock, Tax tax) {
         super(code, description);
         this.reference = reference;
         this.retailPrice = retailPrice;
         this.stock = stock;
+        this.tax = tax;
     }
 
     public ArticleDto(Article article) {
-        this(article.getCode(), article.getDescription(), article.getReference(), article.getRetailPrice(), article.getStock());
+        this(article.getCode(), article.getDescription(), article.getReference(), article.getRetailPrice(), article.getStock(), article.getTax());
         this.setDiscontinued(article.getDiscontinued());
         this.registrationDate = article.getRegistrationDate();
         if (article.getProvider() != null) {
