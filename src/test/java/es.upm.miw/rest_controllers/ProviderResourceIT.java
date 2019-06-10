@@ -1,13 +1,18 @@
 package es.upm.miw.rest_controllers;
 
+import es.upm.miw.business_controllers.ArticleController;
+import es.upm.miw.business_controllers.ProviderController;
 import es.upm.miw.dtos.ProviderDto;
 import es.upm.miw.dtos.ProviderMinimunDto;
+import es.upm.miw.dtos.in.OrderMinimumValidationInputDto;
+import es.upm.miw.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,6 +24,10 @@ public class ProviderResourceIT {
     @Autowired
     private RestService restService;
     private ProviderMinimunDto existentProvider;
+    @Autowired
+    private ProviderController providerController;
+    @Autowired
+    private ArticleController articleController;
 
 
     @BeforeEach
@@ -141,6 +150,39 @@ public class ProviderResourceIT {
                 .get().build());
 
         restCreateService(new ProviderDto(providerDto.getCompany()));
+    }
+
+    @Test
+    void testValidatePresencePass() {
+        List<OrderMinimumValidationInputDto> dtos = new ArrayList<>();
+        dtos.add(
+                new OrderMinimumValidationInputDto(
+                        this.providerController.readAll().get(0),
+                        this.articleController.readArticlesMinimum()
+                )
+        );
+        assertDoesNotThrow(() ->
+                this.restService.loginAdmin().restBuilder(new RestBuilder<ProviderMinimunDto>()).clazz(ProviderMinimunDto.class)
+                        .path(ProviderResource.PROVIDERS).path(ProviderResource.VALIDATE_PRESENCE).body(dtos)
+                        .post().build()
+        );
+    }
+
+    @Test
+    void testValidatePresenceNotPass() {
+        List<OrderMinimumValidationInputDto> dtos = new ArrayList<>();
+        dtos.add(
+                new OrderMinimumValidationInputDto(
+                        this.providerController.readAll().get(0),
+                        this.articleController.readArticlesMinimum()
+                )
+        );
+        dtos.get(0).setArticleIds(new ArrayList<>(Arrays.asList("20")));
+        assertThrows(HttpClientErrorException.NotFound.class, () ->
+                this.restService.loginAdmin().restBuilder(new RestBuilder<ProviderMinimunDto>()).clazz(ProviderMinimunDto.class)
+                        .path(ProviderResource.PROVIDERS).path(ProviderResource.VALIDATE_PRESENCE).body(dtos)
+                        .post().build()
+        );
     }
 
 }
