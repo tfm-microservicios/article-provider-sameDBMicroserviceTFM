@@ -3,9 +3,11 @@ package es.upm.miw.business_controllers;
 import es.upm.miw.documents.Provider;
 import es.upm.miw.dtos.ProviderDto;
 import es.upm.miw.dtos.ProviderMinimunDto;
+import es.upm.miw.dtos.in.OrderMinimumValidationInputDto;
 import es.upm.miw.exceptions.BadRequestException;
 import es.upm.miw.exceptions.ConflictException;
 import es.upm.miw.exceptions.NotFoundException;
+import es.upm.miw.repositories.ArticleRepository;
 import es.upm.miw.repositories.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +20,9 @@ public class ProviderController {
 
     @Autowired
     private ProviderRepository providerRepository;
+
+    @Autowired
+    private ArticleRepository articleRepository;
 
     public ProviderDto read(String id) {
         return new ProviderDto(this.providerRepository.findById(id)
@@ -57,6 +62,19 @@ public class ProviderController {
     public void delete(String code) {
         if (this.providerRepository.findById(code).isPresent()) {
             this.providerRepository.deleteById(code);
+        }
+    }
+
+    public void validatePresence(List<OrderMinimumValidationInputDto> dtos) {
+        for (OrderMinimumValidationInputDto dto : dtos) {
+            if (!this.providerRepository.findById(dto.getProviderId()).isPresent()) {
+                throw new NotFoundException("ProviderId" + dto.getProviderId());
+            }
+            for (String articleId : dto.getArticleIds()) {
+                if (!this.articleRepository.findById(articleId).isPresent()){
+                    throw new NotFoundException("ArticleId" + articleId);
+                }
+            }
         }
     }
 
