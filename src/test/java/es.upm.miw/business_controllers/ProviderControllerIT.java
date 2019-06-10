@@ -3,12 +3,16 @@ package es.upm.miw.business_controllers;
 import es.upm.miw.TestConfig;
 import es.upm.miw.dtos.ProviderDto;
 import es.upm.miw.dtos.ProviderMinimunDto;
+import es.upm.miw.dtos.in.OrderMinimumValidationInputDto;
 import es.upm.miw.exceptions.BadRequestException;
 import es.upm.miw.exceptions.ConflictException;
 import es.upm.miw.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +22,9 @@ public class ProviderControllerIT {
 
     @Autowired
     private ProviderController providerController;
+
+    @Autowired
+    private ArticleController articleController;
 
     @Test
     void testReadAll() {
@@ -97,11 +104,43 @@ public class ProviderControllerIT {
 
     @Test
     void testDelete() {
-        ProviderMinimunDto providerDto= providerController.readAll().get(0);
+        ProviderMinimunDto providerDto = providerController.readAll().get(0);
         assertNotNull(providerDto);
         providerController.delete(providerDto.getId());
         assertThrows(NotFoundException.class, () -> providerController.read(providerDto.getId()));
         providerController.create(new ProviderDto(providerDto.getCompany()));
+    }
+
+    @Test
+    void testValidatePass() {
+        List<OrderMinimumValidationInputDto> dtos = new ArrayList<>();
+        dtos.add(
+                new OrderMinimumValidationInputDto(
+                        this.providerController.readAll().get(0),
+                        this.articleController.readArticlesMinimum()
+                )
+        );
+        assertDoesNotThrow(() -> providerController.validatePresence(dtos));
+    }
+
+    @Test
+    void testValidateNotPassEmptyDto (){
+        assertThrows(NullPointerException.class, ()-> providerController.validatePresence(null));
+    }
+
+    @Test
+    void testValidateNotPass (){
+        List<OrderMinimumValidationInputDto> dtos = new ArrayList<>();
+        dtos.add(
+                new OrderMinimumValidationInputDto(
+                        this.providerController.readAll().get(0),
+                        this.articleController.readArticlesMinimum()
+                )
+        );
+        dtos.get(0).setArticleIds(new ArrayList<>(Arrays.asList("20")));
+        assertThrows(NotFoundException.class, ()->providerController.validatePresence(dtos));
+        dtos.get(0).setProviderId("20");
+        assertThrows(NotFoundException.class, ()->providerController.validatePresence(dtos));
     }
 
 }

@@ -3,6 +3,7 @@ package es.upm.miw.rest_controllers;
 import es.upm.miw.business_controllers.ProviderController;
 import es.upm.miw.dtos.ProviderDto;
 import es.upm.miw.dtos.ProviderMinimunDto;
+import es.upm.miw.dtos.in.OrderMinimumValidationInputDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class ProviderResource {
     public static final String PROVIDERS = "/providers";
     public static final String ACTIVES = "/actives";
     public static final String ID = "/{id}";
+    public static final String VALIDATE_PRESENCE = "/validate-presence";
 
     @Autowired
     private ProviderController providerController;
@@ -52,5 +54,9 @@ public class ProviderResource {
         this.providerController.delete(id);
     }
 
+    @PostMapping(value = VALIDATE_PRESENCE)
+    public void validatePresence (@Valid @RequestBody List<OrderMinimumValidationInputDto> orderMinimumValidationInputDtos){
+        this.providerController.validatePresence(orderMinimumValidationInputDtos);
+    }
 
 }
